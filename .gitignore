@@ -1,0 +1,6 @@
+*.py[co]
+__pycache__
+/.check_report
+/.mypy_cache
+/.coverage
+/.test_report
