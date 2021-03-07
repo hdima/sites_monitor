@@ -4,7 +4,7 @@ from typing import Optional
 import unittest
 from urllib.error import URLError
 
-from ..sites_configuration import SiteInfo, StaticSitesConfiguration
+from ..sites import SiteInfo, StaticSitesConfiguration
 
 
 class TestSiteInfo(unittest.TestCase):

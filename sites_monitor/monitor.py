@@ -1,26 +1,29 @@
 from abc import ABC, abstractmethod
 import datetime
-from enum import Enum, auto
+from enum import Enum
 import time
 from typing import Iterator, Optional
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 
-from .sites_configuration import SiteInfo, SitesConfiguration
+from .sites import SiteInfo, SitesConfiguration
 
 
 class CheckResult(Enum):
-    Unreachable = auto()
-    Reachable = auto()
-    Healthy = auto()
+    """Main check result"""
+    Unreachable = "unreachable"
+    Reachable = "reachable"
+    Healthy = "healthy"
 
 class CheckInfo:
+    """Additional information for healthy and reachable sites"""
 
     def __init__(self, status_code: int, response_time: float) -> None:
         self.status_code = status_code
         self.response_time = response_time
 
 class SiteStatus:
+    """Site status information"""
 
     def __init__(self, url: str, result: CheckResult, info: Optional[CheckInfo] = None,
                  timestamp: Optional[datetime.datetime] = None) -> None:
@@ -30,17 +33,19 @@ class SiteStatus:
         self.result = result
         self.info = info
         if not timestamp:
-            # FIXME: Maybe we want timezone aware datetime here?
-            timestamp = datetime.datetime.utcnow()
+            timestamp = datetime.datetime.now(datetime.timezone.utc)
         self.timestamp = timestamp
 
 class SitesMonitor(ABC):
+    """Sites monitor"""
 
     @abstractmethod
     def iter_statuses(self) -> Iterator[SiteStatus]:
+        """Iterate over site statuses"""
         pass
 
 class SequentialSitesMonitor(SitesMonitor):
+    """Sites monitor to check sites sequentially"""
 
     default_timeout: int = 30
 

@@ -1,11 +1,12 @@
 import datetime
+from datetime import timezone
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import re
 from threading import Thread
 import unittest
 
 from ..monitor import CheckInfo, CheckResult, SiteStatus, SequentialSitesMonitor
-from ..sites_configuration import SiteInfo, StaticSitesConfiguration
+from ..sites import SiteInfo, StaticSitesConfiguration
 
 
 class TestCheckInfo(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestSiteStatus(unittest.TestCase):
         self.assertEqual(CheckResult.Unreachable, status.result)
         self.assertIsNone(status.info)
         self.assertIsInstance(status.timestamp, datetime.datetime)
-        self.assertGreater(2, (datetime.datetime.utcnow() - status.timestamp).total_seconds())
+        self.assertGreater(2, (datetime.datetime.now(timezone.utc) - status.timestamp).total_seconds())
 
 class TestSequentialSitesMonitor(unittest.TestCase):
 
@@ -58,23 +59,25 @@ class TestSequentialSitesMonitor(unittest.TestCase):
         statuses = list(monitor.iter_statuses())
         self.assertEqual(3, len(statuses))
 
+        now = datetime.datetime.now(timezone.utc)
+
         self.assertEqual(site1.url, statuses[0].url)
         self.assertEqual(CheckResult.Healthy, statuses[0].result)
         self.assertIsNotNone(statuses[0].info)
         self.assertEqual(200, statuses[0].info.status_code) # type: ignore
         self.assertGreater(2, statuses[0].info.response_time) # type: ignore
-        self.assertGreater(2, (datetime.datetime.utcnow() - statuses[0].timestamp).total_seconds())
+        self.assertGreater(2, (now - statuses[0].timestamp).total_seconds())
 
         self.assertEqual(site2.url, statuses[1].url)
         self.assertEqual(CheckResult.Reachable, statuses[1].result)
         self.assertIsNotNone(statuses[1].info)
         self.assertEqual(200, statuses[1].info.status_code) # type: ignore
         self.assertGreater(2, statuses[1].info.response_time) # type: ignore
-        self.assertGreater(2, (datetime.datetime.utcnow() - statuses[1].timestamp).total_seconds())
+        self.assertGreater(2, (now - statuses[1].timestamp).total_seconds())
 
         self.assertEqual(site3.url, statuses[2].url)
         self.assertEqual(CheckResult.Reachable, statuses[2].result)
         self.assertIsNotNone(statuses[2].info)
         self.assertEqual(500, statuses[2].info.status_code) # type: ignore
         self.assertGreater(2, statuses[2].info.response_time) # type: ignore
-        self.assertGreater(2, (datetime.datetime.utcnow() - statuses[2].timestamp).total_seconds())
+        self.assertGreater(2, (now - statuses[2].timestamp).total_seconds())

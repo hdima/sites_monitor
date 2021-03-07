@@ -5,6 +5,7 @@ from urllib.error import URLError
 
 
 class SiteInfo:
+    """Information about a site to monitor"""
 
     def __init__(self, url: str, expected_text_pattern: Optional[re.Pattern] = None) -> None:
         self.url = url
@@ -25,12 +26,15 @@ class SiteInfo:
             return False
 
 class SitesConfiguration(ABC):
+    """Configuration for sites to monitor"""
 
     @abstractmethod
     def iter_sites(self) -> Iterator[SiteInfo]:
+        """Iterate over sites configuration"""
         pass
 
 class StaticSitesConfiguration(SitesConfiguration):
+    """Static configuration for sites to monitor"""
 
     def __init__(self, sites: List[SiteInfo]) -> None:
         self._sites = sites
